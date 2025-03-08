@@ -1,0 +1,60 @@
+{% extends "main.html" %}
+
+{% block title %}Start Writing{% endblock %}
+
+{% block content %}
+    <h1>Start Writing</h1>
+    <p>Don't stop writing or your work will gradually disappear!</p>
+    <div id="content" contenteditable="true"></div>
+
+    <script>
+        let timeout;
+        let blurTimeout;
+        let blurLevel = 0;
+        let textInterval;
+        let textContent = "";  // Store the initial content for later reference
+        const contentDiv = document.getElementById("content");
+
+        // This function starts the blur effect after 3 seconds of inactivity
+        function startBlurEffect() {
+            textContent = contentDiv.innerHTML; // Save the current content
+            blurLevel = 0;  // Reset blur level
+
+            // Gradually increase blur over the next 5 seconds
+            textInterval = setInterval(() => {
+                blurLevel += 2;  // Increase blur every 0.5 seconds
+                contentDiv.style.filter = `blur(${blurLevel}px)`;  // Apply the blur effect
+
+                // Check if the blur level reaches 10px (max blur)
+                if (blurLevel >= 10) {
+                    contentDiv.innerHTML = "";  // Clear the content after full blur
+                    clearInterval(textInterval);  // Stop the blur effect
+                    contentDiv.innerHTML = "Oops!!";  // Show "Oops!!" after text is erased
+                    contentDiv.style.filter = "none";  // Remove the blur from the "Oops!!" text
+                }
+            }, 500);  // Increase blur every 500ms (0.5 seconds)
+        }
+
+        // Reset the timer every time the user types
+        contentDiv.addEventListener("input", function() {
+            clearTimeout(timeout);
+            clearInterval(textInterval);  // Cancel any previous blur effect
+
+            contentDiv.style.filter = "none";  // Reset blur effect while typing
+
+            // Reset content if "Oops!!" is showing
+            if (contentDiv.innerHTML === "Oops!!") {
+                contentDiv.innerHTML = "";  // Clear the "Oops!!" message when typing starts again
+            }
+
+            // Restart the blur effect after 3 seconds of inactivity
+            timeout = setTimeout(startBlurEffect, 3000);  // Start blur effect after 3 seconds of inactivity
+        });
+
+        // Clear content immediately if the page is refreshed or the user leaves
+        window.addEventListener("beforeunload", function() {
+            contentDiv.innerHTML = "";  // Clear content when the page is about to unload
+        });
+    </script>
+{% endblock %}
+
